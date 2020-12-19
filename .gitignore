@@ -1,0 +1,7 @@
+*.o
+*.d
+*.elf
+*.pdf
+*.pdf.part
+secret-password.h
+cscope.out
