@@ -1,7 +1,5 @@
 #include "SPI.h"
 
-static SPI_HandleTypeDef spi_1_handler;
-
 void SPI_show_error(HAL_StatusTypeDef rt)
 {
 	if (rt)
@@ -11,31 +9,57 @@ void SPI_show_error(HAL_StatusTypeDef rt)
 void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
 	(void)hspi;
+	if (hspi->Instance == SPI1) {
+		GPIO_InitTypeDef gpio_sck_mosi =
+		{
+			GPIO_PIN_5, //GPIOA5 - sck; GPIOA7 - mosi
+			GPIO_MODE_AF_PP,
+			GPIO_PULLDOWN,
+			GPIO_SPEED_FREQ_LOW
+		};
 
-	GPIO_InitTypeDef gpio_sck_mosi =
-	{
-		GPIO_PIN_5, //GPIOA5 - sck; GPIOA7 - mosi
-		GPIO_MODE_AF_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
-	};
+		GPIO_InitTypeDef gpio_miso =
+		{
+			GPIO_PIN_6,
+			GPIO_MODE_AF_PP,
+			GPIO_PULLDOWN,
+			GPIO_SPEED_FREQ_LOW
+		};
 
-	GPIO_InitTypeDef gpio_miso =
-	{
-		GPIO_PIN_6,
-		GPIO_MODE_AF_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
-	};
+		__HAL_RCC_SPI1_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		HAL_GPIO_Init(GPIOA, &gpio_sck_mosi);
 
-	__HAL_RCC_SPI1_CLK_ENABLE();
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	HAL_GPIO_Init(GPIOA, &gpio_sck_mosi);
+		gpio_sck_mosi.Pin = GPIO_PIN_7;
+		HAL_GPIO_Init(GPIOA, &gpio_sck_mosi);
 
-	gpio_sck_mosi.Pin = GPIO_PIN_7;
-	HAL_GPIO_Init(GPIOA, &gpio_sck_mosi);
+		HAL_GPIO_Init(GPIOA, &gpio_miso);
+	} else if (hspi->Instance == SPI2) {
+		GPIO_InitTypeDef gpio_sck_mosi =
+		{
+			GPIO_PIN_13, //GPIOB13 - sck; GPIOB15 - mosi
+			GPIO_MODE_AF_PP,
+			GPIO_PULLDOWN,
+			GPIO_SPEED_FREQ_LOW
+		};
 
-	HAL_GPIO_Init(GPIOA, &gpio_miso);
+		GPIO_InitTypeDef gpio_miso =
+		{
+			GPIO_PIN_14,
+			GPIO_MODE_AF_PP,
+			GPIO_PULLDOWN,
+			GPIO_SPEED_FREQ_LOW
+		};
+
+		__HAL_RCC_SPI2_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();
+		HAL_GPIO_Init(GPIOB, &gpio_sck_mosi);
+
+		gpio_sck_mosi.Pin = GPIO_PIN_15;
+		HAL_GPIO_Init(GPIOB, &gpio_sck_mosi);
+
+		HAL_GPIO_Init(GPIOB, &gpio_miso);
+	}
 }
 
 static void SPI_handler_basic_init(SPI_HandleTypeDef *spi_handler,
@@ -63,50 +87,49 @@ static uint16_t SPI_wait_for_EOT(SPI_HandleTypeDef *handler)
 	return 0;
 }
 
-HAL_StatusTypeDef SPI_1_init(void)
+HAL_StatusTypeDef SPI_init(SPI_HandleTypeDef *spi, SPI_TypeDef *instance)
 {
 	HAL_StatusTypeDef rt;
-	memset(&spi_1_handler, 0, sizeof(SPI_HandleTypeDef));
-	SPI_handler_basic_init(&spi_1_handler, SPI1);
-	rt = HAL_SPI_Init(&spi_1_handler);
+	SPI_handler_basic_init(spi, instance);
+	rt = HAL_SPI_Init(spi);
 	if (rt)
 		return rt;
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef SPI_1_send(uint8_t *data)
+HAL_StatusTypeDef SPI_send(SPI_HandleTypeDef *spi_handler, uint8_t *data)
 {
 	HAL_StatusTypeDef rt;
-	SPI_wait_for_EOT(&spi_1_handler);
-	rt = HAL_SPI_Transmit(&spi_1_handler, data, 1, 0xFFFF);
-	SPI_wait_for_EOT(&spi_1_handler);
+	SPI_wait_for_EOT(spi_handler);
+	rt = HAL_SPI_Transmit(spi_handler, data, 1, 0xFFFF);
+	SPI_wait_for_EOT(spi_handler);
 	return rt;
 }
 
-HAL_StatusTypeDef SPI_1_read(uint8_t *data, uint16_t bytes)
+HAL_StatusTypeDef SPI_read(SPI_HandleTypeDef *spi_handler, uint8_t *data, uint16_t bytes)
 {
 	HAL_StatusTypeDef rt;
-	SPI_wait_for_EOT(&spi_1_handler);
-	rt = HAL_SPI_Receive(&spi_1_handler, data, bytes, 0xFFFF);
-	SPI_wait_for_EOT(&spi_1_handler);
+	SPI_wait_for_EOT(spi_handler);
+	rt = HAL_SPI_Receive(spi_handler, data, bytes, 0xFFFF);
+	SPI_wait_for_EOT(spi_handler);
 	return rt;
 }
 
-HAL_StatusTypeDef SPI_1_send_and_receive(uint8_t data, uint8_t *receiveData)
+HAL_StatusTypeDef SPI_send_and_receive(SPI_HandleTypeDef *spi_handler, uint8_t data, uint8_t *receiveData)
 {
 	HAL_StatusTypeDef rt;
-	SPI_wait_for_EOT(&spi_1_handler);
-	rt = HAL_SPI_TransmitReceive(&spi_1_handler, &data, receiveData, 1, 0xFFFF);
-	SPI_wait_for_EOT(&spi_1_handler);
+	SPI_wait_for_EOT(spi_handler);
+	rt = HAL_SPI_TransmitReceive(spi_handler, &data, receiveData, 1, 0xFFFF);
+	SPI_wait_for_EOT(spi_handler);
 	return rt;
 }
 
-HAL_StatusTypeDef SPI_1_send_multiple(uint8_t *data, uint8_t size)
+HAL_StatusTypeDef SPI_send_multiple(SPI_HandleTypeDef *spi_handler, uint8_t *data, uint8_t size)
 {
 	HAL_StatusTypeDef rt;
-	SPI_wait_for_EOT(&spi_1_handler);
-	rt = HAL_SPI_Transmit(&spi_1_handler, data, size, 0xFFFF);
-	SPI_wait_for_EOT(&spi_1_handler);
+	SPI_wait_for_EOT(spi_handler);
+	rt = HAL_SPI_Transmit(spi_handler, data, size, 0xFFFF);
+	SPI_wait_for_EOT(spi_handler);
 	return rt;
 }
 

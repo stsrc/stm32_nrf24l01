@@ -46,14 +46,32 @@ static void configure_clock() {
 extern struct simple_buffer UART2_transmit_buffer;
 
 int main(void){
+	struct nrf24 nrf_transmitter = {
+		.spi_handler = { 0 },
+		.spi_instance = SPI1,
+		.gpio = GPIOA,
+		.ce = GPIO_PIN_3,
+		.csn = GPIO_PIN_4
+	};
+
+	struct nrf24 nrf_receiver = {
+		.spi_handler = { 0 },
+		.spi_instance = SPI2,
+		.gpio = GPIOB,
+		.ce = GPIO_PIN_10,
+		.csn = GPIO_PIN_11
+	};
+
 	configure_clock();
 	init_blue_led();
 	delay_init();
 	UART_1_init();
-	NRF24_init();
+	NRF24_init(&nrf_transmitter);
+	NRF24_init(&nrf_receiver);
 	delay_ms(100);
 	while(1){
-		NRF24_test();
+		NRF24_test(&nrf_transmitter);
+		NRF24_test(&nrf_receiver);
 //		GPIO_setBit(LED_port, LED_Blue);
 //		GPIO_clearBit(LED_port, LED_Blue);
 		delay_ms(500);

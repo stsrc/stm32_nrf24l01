@@ -19,8 +19,7 @@
  * @brief SPI library.
  * @{
  *
- * SPI library, which is based on HAL SPI library. LCD, touchpanel and SD card reader uses
- * SPI in this project.
+ * SPI library, which is based on HAL SPI library.
  */
 
 /**
@@ -30,11 +29,14 @@
  */
 void SPI_show_error(HAL_StatusTypeDef rt);
 
-HAL_StatusTypeDef SPI_1_init();
-HAL_StatusTypeDef SPI_1_send_multiple(uint8_t *data, uint8_t size);
-HAL_StatusTypeDef SPI_1_send(uint8_t *data);
-HAL_StatusTypeDef SPI_1_send_and_receive(uint8_t data, uint8_t *receiveData);
-HAL_StatusTypeDef SPI_1_read(uint8_t *data, uint16_t bytes);
+HAL_StatusTypeDef SPI_init(SPI_HandleTypeDef *spi_handler, SPI_TypeDef *SPI);
+HAL_StatusTypeDef SPI_send_multiple(SPI_HandleTypeDef *spi_handler,
+				    uint8_t *data, uint8_t size);
+HAL_StatusTypeDef SPI_send(SPI_HandleTypeDef *spi_handler, uint8_t *data);
+HAL_StatusTypeDef SPI_send_and_receive(SPI_HandleTypeDef *spi_handler,
+				       uint8_t data, uint8_t *receiveData);
+HAL_StatusTypeDef SPI_read(SPI_HandleTypeDef *spi_handler, uint8_t *data,
+			   uint16_t bytes);
 
 #endif
 
