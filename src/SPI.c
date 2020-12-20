@@ -10,7 +10,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
 	(void)hspi;
 	if (hspi->Instance == SPI1) {
-		GPIO_InitTypeDef gpio_sck_mosi =
+		GPIO_InitTypeDef gpio =
 		{
 			GPIO_PIN_5, //GPIOA5 - sck; GPIOA7 - mosi
 			GPIO_MODE_AF_PP,
@@ -21,23 +21,23 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 		GPIO_InitTypeDef gpio_miso =
 		{
 			GPIO_PIN_6,
-			GPIO_MODE_AF_PP,
+			GPIO_MODE_AF_INPUT,
 			GPIO_PULLDOWN,
 			GPIO_SPEED_FREQ_LOW
 		};
 
 		__HAL_RCC_SPI1_CLK_ENABLE();
-		__HAL_RCC_GPIOA_CLK_ENABLE();
-		HAL_GPIO_Init(GPIOA, &gpio_sck_mosi);
 
-		gpio_sck_mosi.Pin = GPIO_PIN_7;
-		HAL_GPIO_Init(GPIOA, &gpio_sck_mosi);
+		HAL_GPIO_Init(GPIOA, &gpio);
+
+		gpio.Pin = GPIO_PIN_7;
+		HAL_GPIO_Init(GPIOA, &gpio);
 
 		HAL_GPIO_Init(GPIOA, &gpio_miso);
 	} else if (hspi->Instance == SPI2) {
-		GPIO_InitTypeDef gpio_sck_mosi =
+		GPIO_InitTypeDef gpio =
 		{
-			GPIO_PIN_13, //GPIOB13 - sck; GPIOB15 - mosi
+			GPIO_PIN_13, // sck
 			GPIO_MODE_AF_PP,
 			GPIO_PULLDOWN,
 			GPIO_SPEED_FREQ_LOW
@@ -46,17 +46,17 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 		GPIO_InitTypeDef gpio_miso =
 		{
 			GPIO_PIN_14,
-			GPIO_MODE_AF_PP,
+			GPIO_MODE_AF_INPUT,
 			GPIO_PULLDOWN,
 			GPIO_SPEED_FREQ_LOW
 		};
 
 		__HAL_RCC_SPI2_CLK_ENABLE();
 		__HAL_RCC_GPIOB_CLK_ENABLE();
-		HAL_GPIO_Init(GPIOB, &gpio_sck_mosi);
+		HAL_GPIO_Init(GPIOB, &gpio);
 
-		gpio_sck_mosi.Pin = GPIO_PIN_15;
-		HAL_GPIO_Init(GPIOB, &gpio_sck_mosi);
+		gpio.Pin = GPIO_PIN_15; // mosi
+		HAL_GPIO_Init(GPIOB, &gpio);
 
 		HAL_GPIO_Init(GPIOB, &gpio_miso);
 	}
