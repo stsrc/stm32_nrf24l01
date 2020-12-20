@@ -52,9 +52,10 @@ void NRF24_init(struct nrf24 *nrf)
 	gpio.Pin = nrf->ce;
 	HAL_GPIO_Init(nrf->gpio, &gpio);
 
-	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_SET); //CE
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET); //CSN
-
+	delay_ms(100);
+	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_SET); //CE
+	delay_ms(100);
 }
 
 void NRF24_init_transmitter(struct nrf24 *nrf)

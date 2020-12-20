@@ -72,34 +72,26 @@ int main(void){
 	NRF24_init(&nrf_transmitter);
 	NRF24_init(&nrf_receiver);
 
-	delay_ms(5000);
+	// two first reads are failing, I don't know why
+	delay_ms(1000);
 	NRF24_test(&nrf_transmitter);
-	delay_ms(100);
+	delay_ms(1000);
 	NRF24_test(&nrf_receiver);
-	delay_ms(100);
-	NRF24_test(&nrf_transmitter);
-	delay_ms(100);
-	NRF24_test(&nrf_receiver);
-	delay_ms(100);
+	delay_ms(1000);
 
 	NRF24_init_transmitter(&nrf_transmitter);
 	NRF24_init_receiver(&nrf_receiver);
-
-	delay_ms(100);
-	NRF24_test(&nrf_transmitter);
-	delay_ms(100);
-	NRF24_test(&nrf_receiver);
-	delay_ms(100);
 
       while(1){
 		counter = (counter + 1) % 20;
 		char buffer = 'A' + counter;
 		char resultBuffer = '_';
 		NRF24_transmitter_send(&nrf_transmitter, (uint8_t *)&buffer, 1);
+		delay_ms(100);
 		NRF24_receiver_receive(&nrf_receiver, (uint8_t *)&resultBuffer, 1);
 		buffer_set_text(&UART1_transmit_buffer, &resultBuffer, 1);
 		UART_1_transmit();
-		delay_ms(500);
+		delay_ms(400);
 
 //		GPIO_setBit(LED_port, LED_Blue);
 //		GPIO_clearBit(LED_port, LED_Blue);
