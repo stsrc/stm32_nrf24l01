@@ -44,7 +44,7 @@ static void configure_clock() {
 }
 
 extern struct simple_buffer UART2_transmit_buffer;
-
+volatile static int irq_flag = 0;
 int main(void){
 	uint8_t counter = 0;
 	struct nrf24 nrf_transmitter = {
@@ -87,12 +87,14 @@ int main(void){
       while(1){
 		counter = (counter + 1) % 20;
 		char buffer = 'A' + counter;
-		char resultBuffer = '_';
+		char resultBuffer[3] = { 0 };
 		NRF24_transmitter_send(&nrf_transmitter, (uint8_t *)&buffer, 1);
-		delay_ms(100);
-		NRF24_receiver_receive(&nrf_receiver, (uint8_t *)&resultBuffer, 1);
-		buffer_set_text(&UART1_transmit_buffer, &resultBuffer, 1);
-		UART_1_transmit();
+		if (irq_flag) {
+			irq_flag = 0;
+			NRF24_receiver_receive(&nrf_receiver, (uint8_t *)resultBuffer, sizeof(resultBuffer));
+			buffer_set_text(&UART1_transmit_buffer, resultBuffer, sizeof(resultBuffer));
+			UART_1_transmit();
+		}
 		delay_ms(400);
 
 //		GPIO_setBit(LED_port, LED_Blue);
@@ -113,4 +115,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		GPIO_clearBit(LED_port, LED_Blue);
 	}
 	mode = (mode + 1) % 2;
+
+	irq_flag = 1;
 }

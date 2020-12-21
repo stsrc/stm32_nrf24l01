@@ -105,16 +105,32 @@ void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, uint8_t bufferSi
 	uint8_t status;
 	NRF24_reg_read(nrf, 0x07, &status, 1);
 	if (status & 0b01000000) {
-		// got packet
-		uint8_t readVal = 0b01100001;
+		// got packet - read
+		uint8_t readVal;
+		uint8_t iteration = 0;
+		uint8_t sizeOfMessage;
+packet:
+		NRF24_reg_read(nrf, 0x11, &sizeOfMessage, 1);
+
+		readVal = 0b01100001;
 		HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
 		SPI_send(&(nrf->spi_handler), &readVal);
-		SPI_read(&(nrf->spi_handler), buffer, bufferSize);
+		//TODO: here should be something different than &buffer[iteration]
+		SPI_read(&(nrf->spi_handler), &buffer[iteration], sizeOfMessage);
 		HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
+
+		//clear irq
 		uint8_t registerValue;
 		NRF24_reg_read(nrf, 0x07, &registerValue, 1);
 		registerValue |= 0b01000000;
 		NRF24_reg_write(nrf, 0x07, &registerValue, 1);
+
+		//check if there is data
+		NRF24_reg_read(nrf, 0x17, &registerValue, 1);
+		if (!(registerValue & 0b00000001)) {
+			iteration++;
+			goto packet;
+		}
 	}
 }
 
