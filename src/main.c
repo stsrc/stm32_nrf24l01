@@ -116,5 +116,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 	mode = (mode + 1) % 2;
 
-	irq_flag = 1;
+	if (GPIO_Pin == GPIO_PIN_12) {
+		irq_flag = 1;
+	}
 }
