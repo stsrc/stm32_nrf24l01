@@ -7,6 +7,7 @@ struct nrf24 {
 	SPI_TypeDef *spi_instance;
 	uint32_t csn;
 	uint32_t ce;
+	uint32_t irq;
 	GPIO_TypeDef *gpio;
 };
 

@@ -52,7 +52,8 @@ int main(void){
 		.spi_instance = SPI1,
 		.gpio = GPIOA,
 		.ce = GPIO_PIN_3,
-		.csn = GPIO_PIN_4
+		.csn = GPIO_PIN_4,
+		.irq = 0
 	};
 
 	struct nrf24 nrf_receiver = {
@@ -60,7 +61,8 @@ int main(void){
 		.spi_instance = SPI2,
 		.gpio = GPIOB,
 		.ce = GPIO_PIN_10,
-		.csn = GPIO_PIN_11
+		.csn = GPIO_PIN_11,
+		.irq = GPIO_PIN_12
 	};
 
 	configure_clock();
@@ -72,7 +74,7 @@ int main(void){
 	NRF24_init(&nrf_transmitter);
 	NRF24_init(&nrf_receiver);
 
-	// two first reads are failing, I don't know why
+	// two first reads always fail, I don't know why
 	delay_ms(1000);
 	NRF24_test(&nrf_transmitter);
 	delay_ms(1000);
@@ -99,3 +101,16 @@ int main(void){
 	return 0;
 }
 
+void EXTI15_10_IRQHandler(void) {
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	static int mode = 0;
+	if (mode) {
+		GPIO_setBit(LED_port, LED_Blue);
+	} else {
+		GPIO_clearBit(LED_port, LED_Blue);
+	}
+	mode = (mode + 1) % 2;
+}

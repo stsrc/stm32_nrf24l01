@@ -52,6 +52,16 @@ void NRF24_init(struct nrf24 *nrf)
 	gpio.Pin = nrf->ce;
 	HAL_GPIO_Init(nrf->gpio, &gpio);
 
+	if (nrf->irq) {
+		gpio.Pin = nrf->irq;
+		gpio.Mode = GPIO_MODE_IT_FALLING;
+		gpio.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(nrf->gpio, &gpio);
+		if (nrf->irq == GPIO_PIN_12) {
+			HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+		}
+	}
+
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET); //CSN
 	delay_ms(100);
 	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_SET); //CE
@@ -101,6 +111,10 @@ void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, uint8_t bufferSi
 		SPI_send(&(nrf->spi_handler), &readVal);
 		SPI_read(&(nrf->spi_handler), buffer, bufferSize);
 		HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
+		uint8_t registerValue;
+		NRF24_reg_read(nrf, 0x07, &registerValue, 1);
+		registerValue |= 0b01000000;
+		NRF24_reg_write(nrf, 0x07, &registerValue, 1);
 	}
 }
 
