@@ -2,8 +2,8 @@ TEMPLATEROOT = ..
 
 # compilation flags for gdb
 
-CFLAGS  = -Os -g3
-ASFLAGS = -g3
+CFLAGS  = -O3 -g0
+ASFLAGS = -g0
 
 # object files
 

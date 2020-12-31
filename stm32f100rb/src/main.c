@@ -1,10 +1,9 @@
 #include <stm32f1xx.h>
 #include <core_cm3.h>
-#include <stdlib.h>
 #include "stupid_delay.h"
 #include "UART.h"
 #include "simple_buffer.h"
-#include <stdio.h>
+
 #include "GPS.h"
 #include "NRF24.h"
 
