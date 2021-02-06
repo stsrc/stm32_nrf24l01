@@ -1,3 +1,22 @@
+/*
+ * where-is-catiusha - cat localisation project
+ * Copyright (C) 2021 Konrad Gotfryd
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <stm32f0xx.h>
 #include <core_cm0.h>
 #include <stm32f0xx_hal_gpio.h>
@@ -36,23 +55,12 @@ int main(void){
 	HAL_GPIO_Init(GPIOB, &gpio);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
 
-/*	GPIO_InitTypeDef gpioo = {
-		GPIO_PIN_2 | GPIO_PIN_3,
-		GPIO_MODE_OUTPUT_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
-	};
-	HAL_GPIO_Init(GPIOA, &gpioo);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_SET);*/
-
 	while(1){
-//		uint8_t buffer[16];
-//		NRF24_transmitter_send(&nrf, (uint8_t *) "this is my position", 3);
-//		UART_1_transmit(0xA6);
-//		memset(buffer, 0, 16);
-//		UART_1_receive(buffer, 16);
-		delay_ms(100);
+		char buffer[512];
+		memset(buffer, 0, sizeof(buffer));
+		gps_get_data(buffer, sizeof(buffer));
+		NRF24_transmitter_send(&nrf, (uint8_t *) buffer, strlen(buffer));
+		delay_ms(20);
 	};
 }
 
