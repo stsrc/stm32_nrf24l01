@@ -25,7 +25,6 @@
 #include "NRF24.h"
 #include "stupid_delay.h"
 
-
 #include "UART.h"
 
 int main(void){
