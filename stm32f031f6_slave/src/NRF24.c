@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include "stupid_delay.h"
 
+void EXTI4_15_IRQHandler(void)
+{
+	while(1);
+}
+
 static HAL_StatusTypeDef NRF24_reg_read(struct nrf24 *nrf,
 					uint8_t reg,
 					uint8_t *data,
@@ -58,7 +63,7 @@ void NRF24_init(struct nrf24 *nrf)
 		gpio.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(nrf->gpio, &gpio);
 		if (nrf->irq == GPIO_PIN_4) {
-			//HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+			HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 		}
 	}
 
@@ -71,18 +76,12 @@ void NRF24_init(struct nrf24 *nrf)
 void NRF24_init_transmitter(struct nrf24 *nrf)
 {
 	uint8_t value = 0x0a;
+	uint8_t valueRead = 0;
 	NRF24_reg_write(nrf, 0x00, &value, 1);
+	NRF24_reg_read(nrf, 0x00, &valueRead, 1);
+	if (value != valueRead)
+		while(1);
 }
-
-/*void NRF24_init_receiver(struct nrf24 *nrf)
-{
-	uint8_t value = 0x0b;
-	NRF24_reg_write(nrf, 0x00, &value, 1);
-
-	//set packet length to 1
-	value = 1;
-	NRF24_reg_write(nrf, 0x11, &value, 1);
-}*/
 
 void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
 {
@@ -99,59 +98,4 @@ void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
 end:
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
 }
-/*
-void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, uint8_t bufferSize)
-{
-	uint8_t status;
-	NRF24_reg_read(nrf, 0x07, &status, 1);
-	if (status & 0b01000000) {
-		// got packet - check its size
-		uint8_t readVal;
-		uint8_t it = 0;
-		uint8_t sizeOfMessage;
-packet:
-		NRF24_reg_read(nrf, 0x11, &sizeOfMessage, 1);
 
-		if (it + sizeOfMessage > bufferSize)
-			return; //TODO: error logging
-
-		// read packet
-		readVal = 0b01100001;
-		HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
-		SPI_send(&(nrf->spi_handler), &readVal);
-		SPI_read(&(nrf->spi_handler), &buffer[it], sizeOfMessage);
-		it += sizeOfMessage;
-		HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
-
-		//clear irq
-		uint8_t registerValue;
-		NRF24_reg_read(nrf, 0x07, &registerValue, 1);
-		registerValue |= 0b01000000;
-		NRF24_reg_write(nrf, 0x07, &registerValue, 1);
-
-		//check if there is data
-		NRF24_reg_read(nrf, 0x17, &registerValue, 1);
-		if (!(registerValue & 0b00000001)) {
-			goto packet;
-		}
-	}
-}
-*/
-/*void NRF24_test(struct nrf24 *nrf)
-{
-	static unsigned iteration = 0;
-	iteration++;
-	uint8_t result = 0;
-	char buffer[64];
-	HAL_StatusTypeDef ret;
-
-	ret = NRF24_reg_read(nrf, 0x0, &result, 1);
-	if (ret)
-		return;
-
-	sprintf(buffer, "iteration - 0x%08x\r\n", iteration);
-	buffer_set_text(&UART1_transmit_buffer, buffer, strlen(buffer));
-	sprintf(buffer, "register  - 0x%02x\r\n\n", result);
-	buffer_set_text(&UART1_transmit_buffer, buffer, strlen(buffer));
-	UART_1_transmit();
-}*/
