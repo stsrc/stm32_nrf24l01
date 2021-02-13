@@ -18,6 +18,7 @@
  */
 
 #include "stupid_delay.h"
+#include <stm32f0xx_hal.h>
 uint64_t __IO delay_val;
 
 void delay_init(){
@@ -38,4 +39,6 @@ void delay_us(uint32_t value){
 
 void SysTick_Handler(void){
 	if(delay_val != 0) delay_val -= 10;
+
+	HAL_IncTick();
 }
