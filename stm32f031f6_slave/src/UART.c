@@ -24,7 +24,6 @@
 
 static UART_HandleTypeDef uart_1_handler;
 
-struct simple_buffer UART1_transmit_buffer;
 struct simple_buffer UART1_receive_buffer;
 
 void USART1_IRQHandler(void)
@@ -45,7 +44,7 @@ void USART1_IRQHandler(void)
 HAL_StatusTypeDef UART_1_init()
 {
 	__HAL_RCC_USART1_CLK_ENABLE();
-	HAL_StatusTypeDef ret;
+	/*HAL_StatusTypeDef ret;
 	UART_InitTypeDef init;
 	init.BaudRate = 9600;
 	init.WordLength = UART_WORDLENGTH_8B;
@@ -58,18 +57,12 @@ HAL_StatusTypeDef UART_1_init()
 	uart_1_handler.Init = init;
 	uart_1_handler.Instance = USART1;
 
-	memset(&UART1_receive_buffer, 0, sizeof(struct simple_buffer));
-	memset(&UART1_transmit_buffer, 0, sizeof(struct simple_buffer));
-
 	ret = HAL_UART_Init(&uart_1_handler);
+	*/
 
-	USART1->CR1 |= USART_CR1_RXNEIE;
+	memset(&UART1_receive_buffer, 0, sizeof(struct simple_buffer));
 
-	return ret;
-}
 
-void HAL_UART_MspInit(UART_HandleTypeDef *huart)
-{
 	GPIO_InitTypeDef init_gpio;
 
 	init_gpio.Pin = GPIO_PIN_2; //txd
@@ -81,19 +74,48 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 	HAL_GPIO_Init(GPIOA, &init_gpio);
 
 	init_gpio.Pin = GPIO_PIN_3; //rxd
-	init_gpio.Pull = GPIO_PULLDOWN;
-	init_gpio.Mode = GPIO_MODE_AF_OD;
+	init_gpio.Pull = GPIO_NOPULL;
+	init_gpio.Mode = GPIO_MODE_AF_PP;
 	init_gpio.Alternate = GPIO_AF1_USART1;
 
 	HAL_GPIO_Init(GPIOA, &init_gpio);
 
+	HAL_NVIC_SetPriority(USART1_IRQn, 2, 0);
+	HAL_NVIC_EnableIRQ(USART1_IRQn);
+
+	USART1->BRR = 833;
+	USART1->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;
+
+	return 0;
+}
+
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{
+	GPIO_InitTypeDef init_gpio;
+
+	init_gpio.Pin = GPIO_PIN_2; //txd
+	init_gpio.Pull = GPIO_PULLUP;
+	init_gpio.Mode = GPIO_MODE_AF_PP;
+	init_gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+	init_gpio.Alternate = GPIO_AF1_USART1;
+
+	HAL_GPIO_Init(GPIOA, &init_gpio);
+
+	init_gpio.Pin = GPIO_PIN_3; //rxd
+	init_gpio.Pull = GPIO_PULLUP;
+	init_gpio.Mode = GPIO_MODE_AF_PP;
+	init_gpio.Alternate = GPIO_AF1_USART1;
+
+	HAL_GPIO_Init(GPIOA, &init_gpio);
+
+	HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 
 }
 
 void UART_1_transmit(uint8_t value)
 {
-	HAL_UART_Transmit(&uart_1_handler, &value, 1, 0);
+	USART1->TDR = value;
 }
 
 void UART_1_receive(uint8_t *buffer, size_t bufferSize)
