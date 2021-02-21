@@ -24,7 +24,7 @@
 
 void EXTI4_15_IRQHandler(void)
 {
-	while(1);
+//	while(1);
 }
 
 static HAL_StatusTypeDef NRF24_reg_read(struct nrf24 *nrf,
@@ -76,19 +76,19 @@ void NRF24_init(struct nrf24 *nrf)
 	gpio.Pin = nrf->ce;
 	HAL_GPIO_Init(nrf->gpio, &gpio);
 
-	if (nrf->irq) {
-		gpio.Pin = nrf->irq;
-		gpio.Mode = GPIO_MODE_IT_FALLING;
-		gpio.Pull = GPIO_NOPULL;
-		HAL_GPIO_Init(nrf->gpio, &gpio);
-		if (nrf->irq == GPIO_PIN_4) {
-			HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
-		}
-	}
+//	if (nrf->irq) {
+//		gpio.Pin = nrf->irq;
+//		gpio.Mode = GPIO_MODE_IT_FALLING;
+//		gpio.Pull = GPIO_NOPULL;
+//		HAL_GPIO_Init(nrf->gpio, &gpio);
+//		if (nrf->irq == GPIO_PIN_4) {
+//			HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+//		}
+//	}
 
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET); //CSN
 	delay_ms(100);
-	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_SET); //CE
+	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_RESET); //CE
 	delay_ms(100);
 }
 
@@ -96,6 +96,9 @@ void NRF24_init_transmitter(struct nrf24 *nrf)
 {
 	uint8_t value = 0x0a;
 	uint8_t valueRead = 0;
+	NRF24_reg_read(nrf, 0x00, &valueRead, 1);
+	if (valueRead != 0x08)
+		while(1);
 	NRF24_reg_write(nrf, 0x00, &value, 1);
 	NRF24_reg_read(nrf, 0x00, &valueRead, 1);
 	if (value != valueRead)
@@ -109,11 +112,17 @@ void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
 
 	uint8_t value = 0b10100000;
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
+
 	HAL_StatusTypeDef ret = SPI_send(&(nrf->spi_handler), &value);
 	if (ret)
 		goto end;
 
 	SPI_send_multiple(&(nrf->spi_handler), data, size);
+	delay_ms(10);
+	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_SET); //CE
+	delay_ms(10);
+	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_RESET); //CE
+
 end:
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
 }

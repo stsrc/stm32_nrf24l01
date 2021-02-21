@@ -20,6 +20,7 @@
 #include <stm32f0xx.h>
 #include <core_cm0.h>
 #include <stm32f0xx_hal_gpio.h>
+#include <stm32f0xx_hal.h>
 #include "GPS.h"
 #include <string.h>
 #include "NRF24.h"
@@ -27,9 +28,30 @@
 
 #include "UART.h"
 
+void setupClock() {
+}
+
 int main(void){
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	setupClock();
+
+	HAL_Init();
+
+	delay_init();
+
+	GPIO_InitTypeDef gpio = {
+		GPIO_PIN_1,
+		GPIO_MODE_OUTPUT_PP,
+		GPIO_PULLDOWN,
+		GPIO_SPEED_FREQ_LOW
+	};
+	HAL_GPIO_Init(GPIOB, &gpio);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+	delay_ms(1000);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+	delay_ms(1);
 
 	struct nrf24 nrf = {
 		.spi_handler = { 0 },
@@ -40,26 +62,24 @@ int main(void){
 		.gpio = GPIOA
 	};
 
-	delay_init();
 	NRF24_init(&nrf);
 	NRF24_init_transmitter(&nrf);
-	gps_init();
+	delay_ms(2);
+	//gps_init();
 
-	GPIO_InitTypeDef gpio = {
-		GPIO_PIN_1,
-		GPIO_MODE_OUTPUT_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
-	};
-	HAL_GPIO_Init(GPIOB, &gpio);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+	int i = 0;
 
 	while(1){
-		char buffer[512];
-		memset(buffer, 0, sizeof(buffer));
-		gps_get_data(buffer, sizeof(buffer));
-		NRF24_transmitter_send(&nrf, (uint8_t *) buffer, strlen(buffer));
-		delay_ms(20);
+	//	char buffer[128];
+	//	memset(buffer, 0, sizeof(buffer));
+	//	gps_get_data(buffer, sizeof(buffer));
+		//size_t stringLength = strlen(buffer);
+		//if (stringLength != 0)
+			//NRF24_transmitter_send(&nrf, (uint8_t *) buffer, stringLength);
+		char value = 'A' + i;
+		i = (i + 1) % 10;
+		NRF24_transmitter_send(&nrf, (uint8_t *) &value, 1);
+		delay_ms(1000);
 	};
 }
 

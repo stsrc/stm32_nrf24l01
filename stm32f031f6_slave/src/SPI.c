@@ -33,7 +33,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 			GPIO_PIN_5, //GPIOA5 - sck; GPIOA7 - mosi
 			GPIO_MODE_AF_PP,
 			GPIO_PULLDOWN,
-			GPIO_SPEED_FREQ_LOW,
+			GPIO_SPEED_FREQ_HIGH,
 			GPIO_AF0_SPI1
 		};
 
@@ -42,7 +42,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 			GPIO_PIN_6,
 			GPIO_MODE_AF_OD,
 			GPIO_PULLDOWN,
-			GPIO_SPEED_FREQ_LOW,
+			GPIO_SPEED_FREQ_HIGH,
 			GPIO_AF0_SPI1
 		};
 
