@@ -44,24 +44,8 @@ void USART1_IRQHandler(void)
 HAL_StatusTypeDef UART_1_init()
 {
 	__HAL_RCC_USART1_CLK_ENABLE();
-	/*HAL_StatusTypeDef ret;
-	UART_InitTypeDef init;
-	init.BaudRate = 9600;
-	init.WordLength = UART_WORDLENGTH_8B;
-	init.StopBits = UART_STOPBITS_1;
-	init.Parity = UART_PARITY_NONE;
-	init.Mode = UART_MODE_TX_RX;
-	init.HwFlowCtl = UART_HWCONTROL_NONE;
-	init.OverSampling = UART_OVERSAMPLING_16;
 
-	uart_1_handler.Init = init;
-	uart_1_handler.Instance = USART1;
-
-	ret = HAL_UART_Init(&uart_1_handler);
-	*/
-
-	memset(&UART1_receive_buffer, 0, sizeof(struct simple_buffer));
-
+	buffer_init(&UART1_receive_buffer);
 
 	GPIO_InitTypeDef init_gpio;
 
@@ -116,9 +100,4 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 void UART_1_transmit(uint8_t value)
 {
 	USART1->TDR = value;
-}
-
-void UART_1_receive(uint8_t *buffer, size_t bufferSize)
-{
-	HAL_UART_Receive_IT(&uart_1_handler, buffer, bufferSize);
 }

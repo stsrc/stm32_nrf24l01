@@ -25,7 +25,7 @@
 #include <string.h>
 #include "NRF24.h"
 #include "stupid_delay.h"
-
+#include <string.h>
 #include "UART.h"
 
 void setupClock() {
@@ -35,9 +35,9 @@ int main(void){
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	setupClock();
-
 	HAL_Init();
+
+	setupClock();
 
 	delay_init();
 
@@ -65,20 +65,24 @@ int main(void){
 	NRF24_init(&nrf);
 	NRF24_init_transmitter(&nrf);
 	delay_ms(2);
-	//gps_init();
-
-	int i = 0;
+	gps_init();
 
 	while(1){
-	//	char buffer[128];
-	//	memset(buffer, 0, sizeof(buffer));
-	//	gps_get_data(buffer, sizeof(buffer));
-		//size_t stringLength = strlen(buffer);
-		//if (stringLength != 0)
-			//NRF24_transmitter_send(&nrf, (uint8_t *) buffer, stringLength);
-		char value = 'A' + i;
-		i = (i + 1) % 10;
-		NRF24_transmitter_send(&nrf, (uint8_t *) &value, 1);
+		char buffer[128];
+		memset(buffer, 0, sizeof(buffer));
+		gps_get_data(buffer, sizeof(buffer));
+
+
+		const char *message = "5232.36020,N,02132.85787,E,084140.00,A,A*66\0";
+		strncpy(buffer, message, strlen(message));
+
+
+		size_t stringLength = strlen(buffer);
+		if (stringLength != 0) {
+			for (size_t i = 0; i < stringLength; i++) {
+				NRF24_transmitter_send(&nrf, (uint8_t *) &buffer[i], 1);
+			}
+		}
 		delay_ms(1000);
 	};
 }

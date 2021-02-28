@@ -33,14 +33,13 @@ int gps_get_data(char *data, size_t data_size) {
 		return -1;
 
 	do {
-		ret = buffer_SearchGetLabel(&UART1_receive_buffer, "$GP",
+		ret = buffer_SearchGetLabel(&UART1_receive_buffer, "$GPGLL,",
 					    "\r\n", data, 0); //TODO data size problems
 		if (ret)
 			delay_ms(delay);
 	} while (((ret == -EBUSY) || (ret == -EINVAL)) && (++cnt < multiplier));
 	if (cnt == multiplier)
 		return -EBUSY;
-
 	return 0;
 }
 

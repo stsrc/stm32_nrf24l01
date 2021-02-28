@@ -103,6 +103,12 @@ void NRF24_init_transmitter(struct nrf24 *nrf)
 	NRF24_reg_read(nrf, 0x00, &valueRead, 1);
 	if (value != valueRead)
 		while(1);
+
+	value = 0x01;
+	NRF24_reg_write(nrf, 0x1d, &value, 1);
+	NRF24_reg_read(nrf, 0x1d, &valueRead, 1);
+	if (value != valueRead)
+		while(1);
 }
 
 void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
@@ -110,7 +116,8 @@ void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
 	if (size > 32)
 		return;
 
-	uint8_t value = 0b10100000;
+//	uint8_t value = 0b10100000;
+	uint8_t value = 0b10110000;
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
 
 	HAL_StatusTypeDef ret = SPI_send(&(nrf->spi_handler), &value);

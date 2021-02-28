@@ -39,9 +39,7 @@
 HAL_StatusTypeDef UART_1_init();
 
 void UART_1_transmit(uint8_t value);
-void UART_1_receive(uint8_t *buffer, size_t bufferSize);
 
-extern struct simple_buffer UART1_transmit_buffer;
 extern struct simple_buffer UART1_receive_buffer;
 
 #endif
