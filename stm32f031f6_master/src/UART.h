@@ -22,6 +22,5 @@ HAL_StatusTypeDef UART_1_init();
 void UART_1_transmit();
 
 extern struct simple_buffer UART1_transmit_buffer;
-extern struct simple_buffer UART1_receive_buffer;
 
 #endif
