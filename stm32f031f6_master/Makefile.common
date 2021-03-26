@@ -40,7 +40,7 @@ LDFLAGS+= -T$(LDSCRIPT) -mcpu=cortex-m0 -mthumb
 LDFLAGS+= -specs=nosys.specs
 LDFLAGS+= -Wall -Wl,-gc-sections,-u,main
 CFLAGS+= -mcpu=cortex-m0 -mthumb
-CFLAGS+= -Os -g3 -Wall -std=gnu99
+CFLAGS+= -Os -g3 -Wall -std=gnu99 -Werror
 CFLAGS+= -fdata-sections -DSTM32F031x6
 CFLAGS+= -I$(CORE) -I$(INCLUDE) -I$(INCLUDE_CORE) -I$(HAL_INCLUDE) -I.
 # Build executable
