@@ -28,18 +28,27 @@ int gps_get_data(char *data, size_t data_size) {
 	uint16_t cnt = 0;
 	uint16_t multiplier = 100;
 	const int delay = 1;
-
+	char temporaryBuffer[data_size];
+	const char *label = "$GPGLL,";
 	if (data_size < 64)
 		return -1;
 
+	memset(data, 0, data_size);
+	memset(temporaryBuffer, 0, data_size);
+
 	do {
-		ret = buffer_SearchGetLabel(&UART1_receive_buffer, "$GPGLL,",
-					    "\r\n", data, 0); //TODO data size problems
+		ret = buffer_SearchGetLabel(&UART1_receive_buffer, label,
+					    "\r\n", temporaryBuffer, 0); //TODO data size problems
 		if (ret)
 			delay_ms(delay);
 	} while (((ret == -EBUSY) || (ret == -EINVAL)) && (++cnt < multiplier));
 	if (cnt == multiplier)
 		return -EBUSY;
+
+	memcpy(data, label, strlen(label));
+	memcpy(data + strlen(label), temporaryBuffer, strlen(temporaryBuffer));
+
+
 	return 0;
 }
 
