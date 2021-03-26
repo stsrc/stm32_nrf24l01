@@ -28,8 +28,42 @@
 #include <string.h>
 #include "UART.h"
 
+
 void setupClock() {
+	//Reset registers
+//	RCC->CR = (RCC->CR & 0x0000FF00) | 0x83;
+	RCC->CFGR = 0;
+	RCC->CFGR2 = 0;
+
+        //HSE turn on
+        RCC->CR |= RCC_CR_HSEON;
+        while(!(RCC->CR & RCC_CR_HSERDY));
+
+        // PLL input clock x6
+        RCC->CFGR &= ~(0xF << 18);
+        RCC->CFGR |= RCC_CFGR_PLLMUL6;
+
+        // PLL source - HSE/PREDIV
+        RCC->CFGR &= ~(0x3 << 15);
+        RCC->CFGR |= RCC_CFGR_PLLSRC_HSE_PREDIV;
+
+        //HSE divider for PLL input clock
+        RCC->CFGR &= ~(1 << 17);
+
+        //PREDIV input clock - no prediv
+        RCC->CFGR2 &= ~(0b1111);
+
+        //PLL turn on
+        RCC->CR |= RCC_CR_PLLON;
+        while(!(RCC->CR & RCC_CR_PLLRDY));
+
+        // Use PLL
+        RCC->CFGR |= RCC_CFGR_SW_PLL;
+        while(!(RCC->CFGR & RCC_CFGR_SWS_PLL));
+
+        SystemCoreClock = 48000000;
 }
+
 
 int main(void){
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -38,7 +72,6 @@ int main(void){
 	HAL_Init();
 
 	setupClock();
-
 	delay_init();
 
 	GPIO_InitTypeDef gpio = {
@@ -73,8 +106,8 @@ int main(void){
 		gps_get_data(buffer, sizeof(buffer));
 
 
-		const char *message = "5232.36020,N,02132.85787,E,084140.00,A,A*66\0";
-		strncpy(buffer, message, strlen(message));
+//		const char *message = "$GPGLL,5232.36020,N,02132.85787,E,084140.00,A,A*66\0";
+//		strncpy(buffer, message, strlen(message));
 
 
 		size_t stringLength = strlen(buffer);
