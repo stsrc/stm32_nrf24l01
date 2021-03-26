@@ -22,8 +22,6 @@
 #include <stm32f0xx_hal_gpio.h>
 #include <stm32f0xx_hal_cortex.h>
 
-static UART_HandleTypeDef uart_1_handler;
-
 struct simple_buffer UART1_receive_buffer;
 
 void USART1_IRQHandler(void)
@@ -67,7 +65,10 @@ HAL_StatusTypeDef UART_1_init()
 	HAL_NVIC_SetPriority(USART1_IRQn, 2, 0);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 
-	USART1->BRR = 833;
+	// UARTDIV = fck / baud
+	//USART1->BRR = 833; //When 8MHz clock
+	//USART1->BRR = 5000; //When 48MHz clock
+	USART1->BRR = SystemCoreClock / 9600;
 	USART1->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;
 
 	return 0;
@@ -94,7 +95,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 
 	HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
-
 }
 
 void UART_1_transmit(uint8_t value)
