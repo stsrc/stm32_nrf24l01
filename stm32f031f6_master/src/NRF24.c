@@ -1,7 +1,30 @@
+/*
+ * where-is-catiusha - cat localisation project
+ * Copyright (C) 2021 Konrad Gotfryd
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include "NRF24.h"
 #include "UART.h"
 #include <stdio.h>
 #include "stupid_delay.h"
+
+void EXTI4_15_IRQHandler(void)
+{
+}
 
 static HAL_StatusTypeDef NRF24_reg_read(struct nrf24 *nrf,
 					uint8_t reg,
@@ -58,7 +81,7 @@ void NRF24_init(struct nrf24 *nrf)
 		gpio.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(nrf->gpio, &gpio);
 		if (nrf->irq == GPIO_PIN_4) {
-			HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+//			HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 		}
 	}
 
@@ -68,13 +91,7 @@ void NRF24_init(struct nrf24 *nrf)
 	delay_ms(100);
 }
 
-void NRF24_init_transmitter(struct nrf24 *nrf)
-{
-	uint8_t value = 0x0a;
-	NRF24_reg_write(nrf, 0x00, &value, 1);
-}
-
-/*void NRF24_init_receiver(struct nrf24 *nrf)
+void NRF24_init_receiver(struct nrf24 *nrf)
 {
 	uint8_t value = 0x0b;
 	NRF24_reg_write(nrf, 0x00, &value, 1);
@@ -82,25 +99,9 @@ void NRF24_init_transmitter(struct nrf24 *nrf)
 	//set packet length to 1
 	value = 1;
 	NRF24_reg_write(nrf, 0x11, &value, 1);
-}*/
-
-void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
-{
-	if (size > 32)
-		return;
-
-	uint8_t value = 0b10100000;
-	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
-	HAL_StatusTypeDef ret = SPI_send(&(nrf->spi_handler), &value);
-	if (ret)
-		goto end;
-
-	SPI_send_multiple(&(nrf->spi_handler), data, size);
-end:
-	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
 }
-/*
-void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, uint8_t bufferSize)
+
+void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, size_t bufferSize)
 {
 	uint8_t status;
 	NRF24_reg_read(nrf, 0x07, &status, 1);
@@ -109,6 +110,7 @@ void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, uint8_t bufferSi
 		uint8_t readVal;
 		uint8_t it = 0;
 		uint8_t sizeOfMessage;
+		uint8_t registerValue;
 packet:
 		NRF24_reg_read(nrf, 0x11, &sizeOfMessage, 1);
 
@@ -124,7 +126,7 @@ packet:
 		HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
 
 		//clear irq
-		uint8_t registerValue;
+
 		NRF24_reg_read(nrf, 0x07, &registerValue, 1);
 		registerValue |= 0b01000000;
 		NRF24_reg_write(nrf, 0x07, &registerValue, 1);
@@ -136,22 +138,3 @@ packet:
 		}
 	}
 }
-*/
-/*void NRF24_test(struct nrf24 *nrf)
-{
-	static unsigned iteration = 0;
-	iteration++;
-	uint8_t result = 0;
-	char buffer[64];
-	HAL_StatusTypeDef ret;
-
-	ret = NRF24_reg_read(nrf, 0x0, &result, 1);
-	if (ret)
-		return;
-
-	sprintf(buffer, "iteration - 0x%08x\r\n", iteration);
-	buffer_set_text(&UART1_transmit_buffer, buffer, strlen(buffer));
-	sprintf(buffer, "register  - 0x%02x\r\n\n", result);
-	buffer_set_text(&UART1_transmit_buffer, buffer, strlen(buffer));
-	UART_1_transmit();
-}*/
