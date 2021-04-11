@@ -1,12 +1,14 @@
-# stm32_nrf24l01 - GPS localisation project
+# stm32_nrf24l01 - GPS localization project
 
-Idea of this project is to create GPS localisation system which utilises android
+Idea of this project is to create GPS localization system which utilises android
 application to present distance and direction to the GPS receiver.
 
 To achieve that multiple devices are used: on slave side we use NEO-6M GPS
 module and nrf24l01 module to transmit GPS data to the master side.
 On master side we use nrf24l01 to receive GPS data and HM-10 module to send it
 to the android phone.
+
+Android application is located in another repository: [Android application](https://github.com/stsrc/whereIsCat)
 
 ## Repository content:
 
@@ -29,6 +31,3 @@ master firmware
 example code for STM32VLDISCOVERY board
 
     ./stm32f100rb
-
-## Additional links:
-[Android application](https://github.com/stsrc/whereIsCat)
