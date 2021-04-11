@@ -29,3 +29,6 @@ master firmware
 example code for STM32VLDISCOVERY board
 
     ./stm32f100rb
+
+## Additional links:
+[Android application](https://github.com/stsrc/whereIsCat)
