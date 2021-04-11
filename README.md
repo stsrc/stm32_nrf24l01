@@ -1,4 +1,4 @@
-#stm32_nrf24l01 - GPS localisation project
+# stm32_nrf24l01 - GPS localisation project
 
 Idea of this project is to create GPS localisation system which utilises android
 application to present distance and direction to the GPS receiver.
