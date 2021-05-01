@@ -99,6 +99,10 @@ void NRF24_init_receiver(struct nrf24 *nrf)
 	//set packet length to 1
 	value = 1;
 	NRF24_reg_write(nrf, 0x11, &value, 1);
+
+	//set data rate to 250kbps and RF output power to 0dBm
+	value = 0b00100110;
+	NRF24_reg_write(nrf, 0x06, &value, 1);
 }
 
 void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, size_t bufferSize)

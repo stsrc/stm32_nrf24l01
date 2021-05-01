@@ -109,6 +109,10 @@ void NRF24_init_transmitter(struct nrf24 *nrf)
 	NRF24_reg_read(nrf, 0x1d, &valueRead, 1);
 	if (value != valueRead)
 		while(1);
+
+	//set data rate to 250kbps and RF output power to 0dBm
+	value = 0b00100110;
+	NRF24_reg_write(nrf, 0x06, &value, 1);
 }
 
 void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
