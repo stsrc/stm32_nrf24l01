@@ -1,8 +1,9 @@
 #include <stm32f0xx_hal.h>
 #include "stupid_delay.h"
-uint64_t __IO delay_val;
+static uint32_t __IO delay_val;
 
 void delay_init(){
+	delay_val = 0;
 	if(SysTick_Config(SystemCoreClock / 100000UL)){
 		while(1);
 	}
