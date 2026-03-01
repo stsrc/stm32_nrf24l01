@@ -28,7 +28,6 @@
 #include <string.h>
 #include "UART.h"
 
-
 void setupClock() {
 	//Reset registers
 //	RCC->CR = (RCC->CR & 0x0000FF00) | 0x83;
@@ -75,10 +74,11 @@ int main(void){
 	delay_init();
 
 	GPIO_InitTypeDef gpio = {
-		GPIO_PIN_1,
-		GPIO_MODE_OUTPUT_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
+		.Pin = GPIO_PIN_1,
+		.Mode = GPIO_MODE_OUTPUT_PP,
+		.Pull = GPIO_NOPULL,
+		.Speed = GPIO_SPEED_FREQ_HIGH,
+		.Alternate = 0,
 	};
 	HAL_GPIO_Init(GPIOB, &gpio);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
@@ -105,16 +105,14 @@ int main(void){
 		memset(buffer, 0, sizeof(buffer));
 		gps_get_data(buffer, sizeof(buffer));
 
-
-//		const char *message = "$GPGLL,5232.36020,N,02132.85787,E,084140.00,A,A*66\0";
-//		strncpy(buffer, message, strlen(message));
-
-
 		size_t stringLength = strlen(buffer);
-		if (stringLength != 0) {
-			for (size_t i = 0; i < stringLength; i++) {
-				NRF24_transmitter_send(&nrf, (uint8_t *) &buffer[i], 1);
-			}
+		if (!stringLength) {
+			strcpy(buffer, "Not connected");
+			stringLength = strlen(buffer);
+		}
+
+		for (size_t i = 0; i < stringLength; i++) {
+			NRF24_transmitter_send(&nrf, (uint8_t *) &buffer[i], 1);
 		}
 		delay_ms(1000);
 	};
