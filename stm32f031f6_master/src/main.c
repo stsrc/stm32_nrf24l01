@@ -70,10 +70,11 @@ int main(void){
 	UART_1_init();
 
 	GPIO_InitTypeDef gpio = {
-		GPIO_PIN_1,
-		GPIO_MODE_OUTPUT_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
+		.Pin = GPIO_PIN_1,
+		.Mode = GPIO_MODE_OUTPUT_PP,
+		.Speed = GPIO_SPEED_FREQ_HIGH,
+		.Pull = GPIO_NOPULL,
+		.Alternate = 0,
 	};
 	HAL_GPIO_Init(GPIOB, &gpio);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
@@ -96,12 +97,15 @@ int main(void){
 	while(1){
 		uint8_t buffer[512];
 		memset(buffer, 0, sizeof(buffer));
-		NRF24_receiver_receive(&nrf, buffer, sizeof(buffer));
+		if (!NRF24_receiver_receive(&nrf, buffer, sizeof(buffer))) {
+			while(1);
+		}
 		size_t stringLength = strlen((char *) buffer);
 		if (stringLength) {
 			buffer_set_text(&UART1_transmit_buffer, (const char *) buffer, stringLength);
 			UART_1_transmit();
 		}
+		delay_ms(10);
 	}
 
 	return 0;
