@@ -7,3 +7,10 @@ OBJS= main.o stupid_delay.o GPS.o simple_buffer.o UART.o stm32f0xx_hal_dma.o stm
 # include common make file
 
 include $(TEMPLATEROOT)/Makefile.common
+
+UNDER_TEST=simple_buffer.c
+UNITTESTS=simple_buffer_unittest.c $(UNITY_SRC)/unity.c
+
+test : $(UNITTESTS) $(UNDER_TEST)
+	gcc -Wall -Werror -O0 -g3 -o test_runner $(UNDER_TEST) $(UNITTESTS) -I. -I$(UNITY_SRC)
+	./test_runner
