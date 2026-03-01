@@ -27,7 +27,3 @@ master PCB with nrf24l01 receiver and HM-10 bluetooth transmitter, battery power
 master firmware
 
     ./stm32f031f6_master
-
-example code for STM32VLDISCOVERY board
-
-    ./stm32f100rb
