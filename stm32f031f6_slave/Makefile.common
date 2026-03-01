@@ -4,7 +4,7 @@ ELF=$(notdir $(CURDIR)).elf
 
 # Libroot path
 
-LIBROOT=/home/kgotfryd/programming/workspace/stm32cube/STM32CubeF0/Drivers/
+LIBROOT=$(CURDIR)/../../external/STM32CubeF0/Drivers/
 
 # Tools
 
@@ -15,13 +15,15 @@ AS=arm-none-eabi-as
 
 # Library paths
 
+UNITY_SRC=$(CURDIR)/../../external/Unity/src
+
 INCLUDE=$(LIBROOT)/CMSIS/Device/ST/STM32F0xx/Include/
 CORE=$(LIBROOT)/CMSIS/Device/ST/STM32F0xx/Source/Templates/
 INCLUDE_CORE=$(LIBROOT)/CMSIS/Core/Include/
 HAL_INCLUDE=$(LIBROOT)/STM32F0xx_HAL_Driver/Inc
 HAL=$(LIBROOT)/STM32F0xx_HAL_Driver/Src
 
-LD_SCRIPT_LOCATION=/home/kgotfryd/programming/workspace/stm32cube/STM32CubeF0/Projects/STM32F031K6-Nucleo/Templates/SW4STM32/STM32F031K6_NUCLEO
+LD_SCRIPT_LOCATION=$(LIBROOT)/../Projects/STM32F031K6-Nucleo/Templates/SW4STM32/STM32F031K6_NUCLEO
 # Search path for core files
 
 vpath %.c $(HAL)

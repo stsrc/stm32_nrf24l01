@@ -1,0 +1,12 @@
+[submodule "stm32f031f6_slave/external/STM32CubeF0"]
+	path = stm32f031f6_slave/external/STM32CubeF0
+	url = git@github.com:STMicroelectronics/STM32CubeF0.git
+[submodule "external/STM32CubeF0"]
+	path = external/STM32CubeF0
+	url = git@github.com:STMicroelectronics/STM32CubeF0.git
+[submodule "stm32f031f6_slave/external/Unity"]
+	path = stm32f031f6_slave/external/Unity
+	url = git@github.com:ThrowTheSwitch/Unity.git
+[submodule "external/Unity"]
+	path = external/Unity
+	url = git@github.com:ThrowTheSwitch/Unity.git
