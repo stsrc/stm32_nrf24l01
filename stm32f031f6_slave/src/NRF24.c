@@ -32,6 +32,9 @@ static HAL_StatusTypeDef NRF24_reg_read(struct nrf24 *nrf,
 					uint8_t *data,
 					uint8_t dataSize)
 {
+	if (dataSize > 1)
+		while(1);
+
 	HAL_StatusTypeDef ret;
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
 	ret = SPI_send(&(nrf->spi_handler), &reg);
@@ -66,10 +69,11 @@ void NRF24_init(struct nrf24 *nrf)
 
 	GPIO_InitTypeDef gpio =
 	{
-		nrf->csn,
-		GPIO_MODE_OUTPUT_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
+		.Pin = nrf->csn,
+		.Mode = GPIO_MODE_OUTPUT_PP,
+		.Pull = GPIO_NOPULL,
+		.Speed = GPIO_SPEED_FREQ_HIGH,
+		.Alternate = 0,
 	};
 	HAL_GPIO_Init(nrf->gpio, &gpio);
 
@@ -96,8 +100,8 @@ void NRF24_init_transmitter(struct nrf24 *nrf)
 {
 	uint8_t value = 0x0a;
 	uint8_t valueRead = 0;
-	NRF24_reg_read(nrf, 0x00, &valueRead, 1);
-	if (valueRead != 0x08)
+	HAL_StatusTypeDef ret = NRF24_reg_read(nrf, 0x00, &valueRead, 1);
+	if (valueRead != 0x08 || ret)
 		while(1);
 	NRF24_reg_write(nrf, 0x00, &value, 1);
 	NRF24_reg_read(nrf, 0x00, &valueRead, 1);
@@ -120,21 +124,15 @@ void NRF24_transmitter_send(struct nrf24 *nrf, uint8_t *data, uint8_t size)
 	if (size > 32)
 		return;
 
-//	uint8_t value = 0b10100000;
 	uint8_t value = 0b10110000;
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
-
 	HAL_StatusTypeDef ret = SPI_send(&(nrf->spi_handler), &value);
-	if (ret)
-		goto end;
-
 	SPI_send_multiple(&(nrf->spi_handler), data, size);
-	delay_ms(10);
+	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
+	if (ret)
+		return;
 	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_SET); //CE
 	delay_ms(10);
 	HAL_GPIO_WritePin(nrf->gpio, nrf->ce, GPIO_PIN_RESET); //CE
-
-end:
-	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_SET);
+	delay_ms(10);
 }
-
