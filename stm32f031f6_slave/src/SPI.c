@@ -30,20 +30,20 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 	if (hspi->Instance == SPI1) {
 		GPIO_InitTypeDef gpio =
 		{
-			GPIO_PIN_5, //GPIOA5 - sck; GPIOA7 - mosi
-			GPIO_MODE_AF_PP,
-			GPIO_PULLDOWN,
-			GPIO_SPEED_FREQ_HIGH,
-			GPIO_AF0_SPI1
+			.Pin = GPIO_PIN_5, //GPIOA5 - sck; GPIOA7 - mosi
+			.Mode = GPIO_MODE_AF_PP,
+			.Speed = GPIO_SPEED_FREQ_HIGH,
+			.Alternate = GPIO_AF0_SPI1,
+			.Pull = GPIO_PULLDOWN,
 		};
 
 		GPIO_InitTypeDef gpio_miso =
 		{
-			GPIO_PIN_6,
-			GPIO_MODE_AF_OD,
-			GPIO_PULLDOWN,
-			GPIO_SPEED_FREQ_HIGH,
-			GPIO_AF0_SPI1
+			.Pin = GPIO_PIN_6,
+			.Mode = GPIO_MODE_AF_OD,
+			.Pull = GPIO_PULLDOWN,
+			.Speed = GPIO_SPEED_FREQ_HIGH,
+			.Alternate = GPIO_AF0_SPI1
 		};
 
 		__HAL_RCC_SPI1_CLK_ENABLE();
