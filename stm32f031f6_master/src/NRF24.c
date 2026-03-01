@@ -20,6 +20,7 @@
 #include "NRF24.h"
 #include "UART.h"
 #include <stdio.h>
+#include <stdbool.h>
 #include "stupid_delay.h"
 
 void EXTI4_15_IRQHandler(void)
@@ -34,6 +35,9 @@ static HAL_StatusTypeDef NRF24_reg_read(struct nrf24 *nrf,
 	HAL_StatusTypeDef ret;
 	HAL_GPIO_WritePin(nrf->gpio, nrf->csn, GPIO_PIN_RESET);
 	ret = SPI_send(&(nrf->spi_handler), &reg);
+	if (ret)
+		return ret;
+	ret = SPI_read(&(nrf->spi_handler), data, dataSize);
 	if (ret)
 		return ret;
 	ret = SPI_read(&(nrf->spi_handler), data, dataSize);
@@ -65,10 +69,11 @@ void NRF24_init(struct nrf24 *nrf)
 
 	GPIO_InitTypeDef gpio =
 	{
-		nrf->csn,
-		GPIO_MODE_OUTPUT_PP,
-		GPIO_PULLDOWN,
-		GPIO_SPEED_FREQ_LOW
+		.Pin = nrf->csn,
+		.Mode = GPIO_MODE_OUTPUT_PP,
+		.Speed = GPIO_SPEED_FREQ_HIGH,
+		.Pull = GPIO_NOPULL,
+		.Alternate = 0,
 	};
 	HAL_GPIO_Init(nrf->gpio, &gpio);
 
@@ -78,7 +83,6 @@ void NRF24_init(struct nrf24 *nrf)
 	if (nrf->irq) {
 		gpio.Pin = nrf->irq;
 		gpio.Mode = GPIO_MODE_IT_FALLING;
-		gpio.Pull = GPIO_NOPULL;
 		HAL_GPIO_Init(nrf->gpio, &gpio);
 		if (nrf->irq == GPIO_PIN_4) {
 //			HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
@@ -105,7 +109,7 @@ void NRF24_init_receiver(struct nrf24 *nrf)
 	NRF24_reg_write(nrf, 0x06, &value, 1);
 }
 
-void NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, size_t bufferSize)
+bool NRF24_receiver_receive(struct nrf24 *nrf, uint8_t *buffer, size_t bufferSize)
 {
 	uint8_t status;
 	NRF24_reg_read(nrf, 0x07, &status, 1);
@@ -119,7 +123,7 @@ packet:
 		NRF24_reg_read(nrf, 0x11, &sizeOfMessage, 1);
 
 		if (it + sizeOfMessage > bufferSize)
-			return; //TODO: error logging
+			return false; //TODO: error logging
 
 		// read packet
 		readVal = 0b01100001;
@@ -141,4 +145,5 @@ packet:
 			goto packet;
 		}
 	}
+	return true;
 }
